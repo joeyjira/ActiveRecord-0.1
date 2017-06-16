@@ -113,9 +113,24 @@ class SQLObject
 
   def update
     # ...
+    update_row = self.class.columns.map { |item| "#{item} = ?" }.join(", ")
+
+    DBConnection.execute(<<-SQL, *attribute_values, id)
+      UPDATE
+        #{self.class.table_name}
+      SET
+        #{update_row}
+      WHERE
+        #{self.class.table_name}.id = ?
+    SQL
   end
 
   def save
     # ...
+    if id.nil?
+      insert
+    else
+      update
+    end
   end
 end
